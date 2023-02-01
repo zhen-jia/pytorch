@@ -33,7 +33,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
   set_source_files_properties(src/conv-run.cc PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
   set_source_files_properties(src/deconv-run.cc PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
   set_source_files_properties(src/fc-run.cc PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
-  set_source_files_properties(src/fc-dynamic-run.cc PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations)
+  set_source_files_properties(src/fc-dynamic-run.cc PROPERTIES COMPILE_FLAGS "-march=armv8.2-a+sve+fp16+dotprod -Wno-deprecated-declarations")
 endif()
 
 # ---[ CMake options

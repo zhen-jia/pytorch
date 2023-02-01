@@ -66,7 +66,7 @@ inline TensorQuantizationParams ChooseQuantizationParams(
     bool reduce_range = false) {
   TORCH_CHECK(
       min <= max,
-      "In ChooseQuantizationParams, min should be less than or equal to max");
+      "In ChooseQuantizationParams, min should be less than or equal to max", min, max);
 
   if (reduce_range) {
     qmin = qmin/2;
