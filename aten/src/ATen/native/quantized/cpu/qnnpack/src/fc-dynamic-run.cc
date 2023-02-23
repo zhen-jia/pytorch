@@ -32,7 +32,7 @@ void sve_hybrid_s8s32_mmla_6x4VL(
     bool accumulate,
     uint8_t input_zp,
     uint8_t param_zp,
-    float scale)
+    float scale, size_t a_stride, size_t c_stride)
 
 {
   struct KernelArgs {
@@ -45,15 +45,18 @@ void sve_hybrid_s8s32_mmla_6x4VL(
     size_t input_offset = {};
   } ka;
 
-  uint32_t tmp[192];
+  //uint32_t tmp[192];
   unsigned long flags = 0;
   void* output_ptr;
   void* input_ptr;
-  // output_ptr = (void*)(output_arg);
-  output_ptr = (void*)(tmp);
+  output_ptr = (void*)(output_arg);
+  //output_ptr = (void*)(tmp);
   input_ptr = (void*)(A_arg);
   flags |= 0x4;
-  k_len = string_lengths[0];
+  int k_len = string_lengths[0];
+
+  ka.output_offset = c_stride;
+  ka.input_offset = a_stride;
   //    if (output_arg.is_indirect) {
   //        output_ptr=(void *)(output_arg.indirect.ptr);
   //        ka.output_offset=output_arg.indirect.offset;
@@ -3389,10 +3392,30 @@ void sve_hybrid_s8s32_mmla_6x4VL(
   //      "z29",
   //      "z30",
   //      "z31");
-  for (int i = 0; i < 192; ++i) {
-    // output_arg[i] = scale * (tmp[i] - zero_point);
-    //output_arg[i] = 1.0 * (2 + i);
-  }
+  //for (int i = 0; i < 192; ++i) {
+  //  // output_arg[i] = scale * (tmp[i] - zero_point);
+  //  //output_arg[i] = 1.0 * (2 + i);
+  //}
+  //
+  //auto out_u32 = (unsigned*)(output_arg);
+  //auto out_fp = reinterpret_cast<float*>(output_arg);
+  //float zazbk = float(k_len) * float(input_zp) * float(param_zp);
+  //for (int i = 0; i < M; ++i) {
+  //  for (int j = 0; j < N; ++j) {
+  //    float qa = 0;
+  //    float qb = 0;
+  //    //for (int k = 0; k < k_len; ++k) {
+  //    //  qa += float(A_arg[i * k_len + k]);
+  //    //}
+  //   // for (int k = 0; k < k_len; ++k) {
+  //   //   qb += float(B_ptr[j * k_len + k]);
+  //   // }
+
+  //    out_fp[i * c_stride + j] = scale *
+  //        (float(out_u32[i * c_stride + j]) - float(param_zp) * qa -
+  //         float(input_zp) * qb + zazbk);
+  //  }
+  //}
 }
 
 static void compute_q8gemm_dq(
@@ -3415,16 +3438,16 @@ static void compute_q8gemm_dq(
   float* c = context->c;
   const size_t c_stride = context->c_stride;
   const float* bias = context->bias;
-  std::cout << "=======>>>> mr_block_size is " << mr_block_size
-            << " nr_block_size is " << nr_block_size << " k is " << k
-            << " pixel_index is " << pixel_index << " mr_block_start "
-            << mr_block_start << " a_stride " << a_stride << " group_index "
-            << group_index << " k is " << k << " a offset is "
-            << (pixel_index + mr_block_start) * a_stride + group_index * k
-            << " nr_block_start " << nr_block_start << " n_stride " << n_stride
-            << " k_stride " << k_stride << " c_stride " << c_stride
-            << " output_channel_index " << nr_block_start << std::endl
-            << std::flush;
+  //std::cout << "=======>>>> mr_block_size is " << mr_block_size
+  //          << " nr_block_size is " << nr_block_size << " k is " << k
+  //          << " pixel_index is " << pixel_index << " mr_block_start "
+  //          << mr_block_start << " a_stride " << a_stride << " group_index "
+  //          << group_index << " k is " << k << " a offset is "
+  //          << (pixel_index + mr_block_start) * a_stride + group_index * k
+  //          << " nr_block_start " << nr_block_start << " n_stride " << n_stride
+  //          << " k_stride " << k_stride << " c_stride " << c_stride
+  //          << " output_channel_index " << nr_block_start << std::endl
+  //          << std::flush;
   size_t output_channel_index = nr_block_start;
   uint8_t input_zp = context->quantization_params.input_zero_point;
   uint8_t param_zp = context->quantization_params.kernel_zero_points[0];
@@ -3439,8 +3462,43 @@ static void compute_q8gemm_dq(
       packed_w + (nr_block_start + group_index * n_stride) * (k_stride),
       c + (pixel_index + mr_block_start) * c_stride + nr_block_start +
           group_index * n,
-      (bool)nr_block_start, input_zp, param_zp, scale);
+      (bool)nr_block_start,
+      input_zp,
+      param_zp,
+      scale,
+      a_stride,
+      c_stride);
 
+  //sve_hybrid_s8s32_mmla_6x4VL(
+  //    1,
+  //    &len,
+  //    a + (pixel_index + mr_block_start) * a_stride + group_index * k,
+  //    mr_block_size,
+  //    nr_block_size,
+  //    packed_w + (nr_block_start + group_index * n_stride) * (k_stride),
+  //    c + (pixel_index + mr_block_start) * c_stride + nr_block_start +
+  //        group_index * n,
+  //    (bool)nr_block_start,
+  //    input_zp,
+  //    param_zp,
+  //    scale,
+  //    a_stride,
+  //    c_stride);
+  //sve_hybrid_s8s32_mmla_6x4VL(
+  //    1,
+  //    &len,
+  //    a + (pixel_index + mr_block_start) * a_stride + group_index * k,
+  //    mr_block_size,
+  //    nr_block_size,
+  //    packed_w + (nr_block_start + group_index * n_stride) * (k_stride),
+  //    c + (pixel_index + mr_block_start) * c_stride + nr_block_start +
+  //        group_index * n,
+  //    (bool)nr_block_start,
+  //    input_zp,
+  //    param_zp,
+  //    scale,
+  //    a_stride,
+  //    c_stride);
   //context->ukernel(
   //    mr_block_size,
   //    nr_block_size,
@@ -3473,7 +3531,7 @@ enum pytorch_qnnp_status qnnpackLinearDynamic(
   const size_t groups = 1;
   const size_t group_input_channels = input_channels;
   const size_t group_output_channels = output_channels;
-  const uint32_t mr = 6; // pytorch_qnnp_params.q8conv.mr;
+  //const uint32_t mr = 6; // pytorch_qnnp_params.q8conv.mr;
   const uint32_t nr = 32; // pytorch_qnnp_params.q8conv.nr;
   const uint32_t kr = 1; //pytorch_qnnp_params.q8conv.kr;
   const size_t k_stride = (group_input_channels + (kr - 1)) & -kr;
@@ -3486,13 +3544,16 @@ enum pytorch_qnnp_status qnnpackLinearDynamic(
     input_zero_point, kernel_zero_points, dequantization_scales,
   };
 
-  std::cout << "--------->>>>>>>input channels is " << input_channels
-            << " output channels is " << output_channels << " k_stride is "
-            << k_stride << " n_strde is " << n_stride << " batch_size is "
-            << batch_size << std::endl
-            << std::flush;
- 
+  //std::cout << "--------->>>>>>>input channels is " << input_channels
+  //          << " output channels is " << output_channels << " k_stride is "
+  //          << k_stride << " n_strde is " << n_stride << " batch_size is "
+  //          << batch_size << std::endl
+  //          << std::flush;
 
+  //std::cout << "groups is " << groups << " output size is " << output_size
+  //          << " group_output_channels " << group_output_channels << " mr "
+  //          << mr << " nr " << nr << "\n"
+  //          << std::flush;
   struct q8gemm_dq_context q8gemm_dq_context = {
       .k = group_input_channels,
       .k_stride = k_stride,
@@ -3530,7 +3591,7 @@ enum pytorch_qnnp_status qnnpackLinearDynamic(
       group_output_channels,
       1,
       output_size,
-      mr,
+      output_size,
       nr);
 
   return pytorch_qnnp_status_success;

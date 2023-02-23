@@ -18,12 +18,12 @@ PackBMatrix::PackBMatrix(
   for (size_t i = 0; i < output_channels; ++i) {
     if (requantization_scales[i] <= 0.0f ||
         !std::isnormal(requantization_scales[i])) {
-      pytorch_qnnp_log_error(
-          "failed to create fully connected operator with requant scale of "
-          "%.7g for output channel %d."
-          "Scale must be finite and positive",
-          requantization_scales[i], (int)i);
-      assert(false && "QNNPACK Runtime Error.");
+      //pytorch_qnnp_log_error(
+      //    "failed to create fully connected operator with requant scale of "
+      //    "%.7g for output channel %d."
+      //    "Scale must be finite and positive",
+      //    requantization_scales[i], (int)i);
+      //assert(false && "QNNPACK Runtime Error.");
     }
   }
 

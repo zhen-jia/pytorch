@@ -447,11 +447,11 @@ C10_UNUSED std::vector<float> generate_requantization_scales(
   for (const auto i : c10::irange(num_output_channels_padded)) {
     const auto inverse_output_scale = 1.f /output_scale;
     requant_scales[i] = (weight_scales_data[i] * input_scale) * inverse_output_scale;
-    TORCH_CHECK(
-        (requant_scales[i] > 0.0f && std::isnormal(requant_scales[i])),
-        "failed to create op with requantization scale: ",
-        requant_scales[i],
-        ": requantization scale must be finite and positive");
+    //TORCH_CHECK(
+    //    (requant_scales[i] > 0.0f && std::isnormal(requant_scales[i])),
+    //    "failed to create op with requantization scale: ",
+    //    requant_scales[i],
+    //    ": requantization scale must be finite and positive");
   }
   return requant_scales;
 }

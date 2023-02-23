@@ -237,7 +237,7 @@ at::Tensor PackedLinearWeightsQnnp::apply_dynamic_impl(
     at::Tensor input,
     bool reduce_range) {
    // TORCH_WARN("-----------------enter apply_dynamic_imply ----------------- \n");
-   std::cout << "------- in apply_dynamic_imply \n";
+   //std::cout << "------- in apply_dynamic_imply \n";
    if (reduce_range) {
      TORCH_WARN(
          "Currently, qnnpack incorrectly ignores reduce_range when it is set to true; this may change in a future release.");
@@ -270,8 +270,9 @@ at::Tensor PackedLinearWeightsQnnp::apply_dynamic_impl(
   float x_min;
   // NOLINTNEXTLINE(cppcoreguidelines-init-variables)
   float x_max;
-  std::cout << "------- in apply_dynamic_imply input.numel is " << input.numel()
-            << "\n";
+  // std::cout << "------- in apply_dynamic_imply input.numel is " <<
+  // input.numel()
+  //          << "\n";
   if (input.numel() > 0) {
     x_min = input_contig.min().item<float>();
     x_max = input_contig.max().item<float>();
@@ -281,8 +282,8 @@ at::Tensor PackedLinearWeightsQnnp::apply_dynamic_impl(
     x_min = 0;
     x_max = 0;
   }
-  std::cout << "------- in apply_dynamic_imply min is " << x_min << " max is "
-            << x_max << "\n";
+  //std::cout << "------- in apply_dynamic_imply min is " << x_min << " max is "
+  //          << x_max << "\n";
 
   auto q_params = quant_utils::ChooseQuantizationParams(
       /*min=*/x_min,
@@ -340,8 +341,8 @@ at::Tensor PackedLinearWeightsQnnp::apply_dynamic_impl(
   // as well as to avoid repopulating requant scale if scale has not changed.
   input_scale = q_params.scale;
 
-  std::cout << "------- in apply_dynamic_imply input scale is "
-            << input_scale.value() << "\n";
+  // std::cout << "------- in apply_dynamic_imply input scale is "
+  //          << input_scale.value() << "\n";
   // Quantize input
   Tensor q_input = at::quantize_per_tensor(
       input_contig, q_params.scale, q_params.zero_point, c10::kQUInt8);

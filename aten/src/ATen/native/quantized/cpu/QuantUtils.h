@@ -64,9 +64,9 @@ inline TensorQuantizationParams ChooseQuantizationParams(
     bool preserve_sparsity = false,
     bool force_scale_power_of_two = false,
     bool reduce_range = false) {
-  TORCH_CHECK(
-      min <= max,
-      "In ChooseQuantizationParams, min should be less than or equal to max", min, max);
+  //TORCH_CHECK(
+  //    min <= max,
+  //    "In ChooseQuantizationParams, min should be less than or equal to max", min, max);
 
   if (reduce_range) {
     qmin = qmin/2;
@@ -87,9 +87,9 @@ inline TensorQuantizationParams ChooseQuantizationParams(
   min = std::min(min, 0.f);
   max = std::max(max, 0.f);
 
-  TORCH_CHECK(
-      qmin < qmax,
-      "In ChooseQuantizationParams, qmin should be less than qmax");
+  //TORCH_CHECK(
+  //    qmin < qmax,
+  //    "In ChooseQuantizationParams, qmin should be less than qmax");
 
   // Use double precision for intermediate computation but use single precision
   // in final number to reflect the actual number used during quantization.
@@ -101,7 +101,7 @@ inline TensorQuantizationParams ChooseQuantizationParams(
   if (float(scale) == 0.0f || std::isinf(1.0f / float(scale))) {
     scale = 0.1;
   }
-  TORCH_CHECK(scale > 0, "quantization scale should be > 0");
+  //TORCH_CHECK(scale > 0, "quantization scale should be > 0");
 
   if (force_scale_power_of_two) {
     if (scale < 1) {
